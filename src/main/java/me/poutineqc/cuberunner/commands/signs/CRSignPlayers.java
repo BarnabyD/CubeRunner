@@ -2,12 +2,12 @@ package me.poutineqc.cuberunner.commands.signs;
 
 import java.util.UUID;
 
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.block.Sign;
 
 import me.poutineqc.cuberunner.Language;
 import me.poutineqc.cuberunner.Language.Messages;
+import me.poutineqc.cuberunner.utils.Utils;
 
 public abstract class CRSignPlayers extends CRSignDisplay {
 
@@ -24,17 +24,16 @@ public abstract class CRSignPlayers extends CRSignDisplay {
 		switch (arena.getGameState()) {
 		case ACTIVE:
 		case ENDING:
-			sign.setLine(3, ChatColor.translateAlternateColorCodes('&', local.get(Messages.KEYWORD_GAMESTATE_ACTIVE)));
+			sign.line(3, Utils.coloredComponent(local.get(Messages.KEYWORD_GAMESTATE_ACTIVE)));
 			break;
 		case READY:
 		case STARTUP:
-			sign.setLine(3,
-					ChatColor.stripColor(ChatColor.translateAlternateColorCodes('&', local.get(Messages.KEYWORD_SCOREBOARD_PLAYERS)))
-							+ " : " + String.valueOf(arena.getAmountOfPlayerInGame()) + "/"
-							+ String.valueOf(arena.getMaxPlayer()));
+			sign.line(3, Utils.coloredComponent("&a" + Utils.strip(Utils.color(local.get(Messages.KEYWORD_SCOREBOARD_PLAYERS)))
+					+ " : &d" + String.valueOf(arena.getAmountOfPlayerInGame()) + "/"
+					+ String.valueOf(arena.getMaxPlayer())));
 			break;
 		case UNREADY:
-			sign.setLine(3, ChatColor.translateAlternateColorCodes('&', local.get(Messages.KEYWORD_GAMESTATE_UNSET)));
+			sign.line(3, Utils.coloredComponent(local.get(Messages.KEYWORD_GAMESTATE_UNSET)));
 			break;
 		}
 

@@ -1,14 +1,15 @@
 package me.poutineqc.cuberunner.commands.inventories;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import net.kyori.adventure.text.Component;
 
 import me.poutineqc.cuberunner.CRPlayer;
 import me.poutineqc.cuberunner.CRPlayer.PlayerStatsException;
 import me.poutineqc.cuberunner.Language.Messages;
+import me.poutineqc.cuberunner.utils.Utils;
 
 public abstract class CRInventory {
 	protected Inventory inventory;
@@ -25,16 +26,21 @@ public abstract class CRInventory {
 	public abstract void update(ItemStack itemStack, InventoryAction action);
 
 	public static boolean areEqualOnColorStrip(String itemA, String itemB) {
-		return ChatColor.stripColor(ChatColor.translateAlternateColorCodes('&', itemA))
-				.equalsIgnoreCase(ChatColor.stripColor(ChatColor.translateAlternateColorCodes('&', itemB)));
+		return Utils.strip(Utils.color(itemA))
+				.equalsIgnoreCase(Utils.strip(Utils.color(itemB)));
 	}
 
 	protected void createInventory() {
-		inventory = Bukkit.createInventory(crPlayer.getPlayer(), amountOfRows * 9, getFullTitle());
+		inventory = Bukkit.createInventory(crPlayer.getPlayer(), amountOfRows * 9, getFullTitleComponent());
+	}
+
+	protected Component getFullTitleComponent() {
+		return Utils.coloredComponent(
+				crPlayer.getLanguage().get(Messages.PREFIX_SHORT) + " " + this.title);
 	}
 
 	protected String getFullTitle() {
-		String title = ChatColor.translateAlternateColorCodes('&',
+		String title = Utils.color(
 				crPlayer.getLanguage().get(Messages.PREFIX_SHORT) + " " + this.title);
 		return title;
 	}

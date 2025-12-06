@@ -2,7 +2,6 @@ package me.poutineqc.cuberunner.commands.signs;
 
 import java.util.UUID;
 
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
@@ -13,6 +12,7 @@ import me.poutineqc.cuberunner.CubeRunner;
 import me.poutineqc.cuberunner.Language;
 import me.poutineqc.cuberunner.Language.Messages;
 import me.poutineqc.cuberunner.game.Arena;
+import me.poutineqc.cuberunner.utils.Utils;
 
 public class CRSignTop extends CRSignDisplay {
 
@@ -21,9 +21,9 @@ public class CRSignTop extends CRSignDisplay {
 		this.arena = arena;
 
 		Language local = Language.getDefault();
-		event.setLine(0, ChatColor.translateAlternateColorCodes('&', local.get(Messages.PREFIX_LONG)));
-		event.setLine(1, ChatColor.translateAlternateColorCodes('&', local.get(Messages.KEYWORD_SIGN_TOP)));
-		event.setLine(3, arena.getHighestPlayer());
+		event.line(0, Utils.coloredComponent(local.get(Messages.PREFIX_LONG)));
+		event.line(1, Utils.coloredComponent(local.get(Messages.KEYWORD_SIGN_TOP)));
+		event.line(3, Utils.coloredComponent(arena.getHighestPlayer()));
 
 		signs.add(this);
 
@@ -58,8 +58,8 @@ public class CRSignTop extends CRSignDisplay {
 
 	@Override
 	protected boolean updateSign(Language local, Sign sign) {
-		sign.setLine(0, ChatColor.translateAlternateColorCodes('&', local.get(Messages.PREFIX_LONG)));
-		sign.setLine(1, ChatColor.translateAlternateColorCodes('&', local.get(Messages.KEYWORD_SIGN_TOP)));
+		sign.line(0, Utils.coloredComponent(local.get(Messages.PREFIX_LONG)));
+		sign.line(1, Utils.coloredComponent(local.get(Messages.KEYWORD_SIGN_TOP)));
 		sign.update();
 
 		if (arena == null)
@@ -71,15 +71,15 @@ public class CRSignTop extends CRSignDisplay {
 
 	@Override
 	protected void updateDisplay(Language local, Sign sign) {
-		sign.setLine(3, arena.getHighestPlayer());
+		sign.line(3, Utils.coloredComponent(arena.getHighestPlayer()));
 		sign.update();
 	}
 
 	@Override
 	public void onInteract(Player player) {
 		Language local = CubeRunner.get().getLang(player);
-		local.sendMsg(player, local.get(Messages.KEYWORD_SIGN_TOP) + ChatColor.WHITE + " : " + String.valueOf(arena.getHighestPlayerScore())
-				+ " " + local.get(Messages.KEYWORD_GENERAL_BY) + " " + ChatColor.DARK_AQUA + arena.getHighestPlayer());
+		local.sendMsg(player, local.get(Messages.KEYWORD_SIGN_TOP) + Utils.color("&f : ") + String.valueOf(arena.getHighestPlayerScore())
+				+ " " + local.get(Messages.KEYWORD_GENERAL_BY) + " " + Utils.color("&3") + arena.getHighestPlayer());
 	}
 
 }

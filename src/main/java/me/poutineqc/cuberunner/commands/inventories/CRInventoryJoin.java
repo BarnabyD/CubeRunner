@@ -3,7 +3,6 @@ package me.poutineqc.cuberunner.commands.inventories;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.inventory.ItemStack;
@@ -61,7 +60,7 @@ public class CRInventoryJoin extends CRInventory {
 		 ***************************************************/
 
 		icon = new InventoryItem(new ItemStackManager(Material.CYAN_STAINED_GLASS_PANE));
-		icon.getItem().setDisplayName(ChatColor.RED + "");
+		icon.getItem().setDisplayName("");
 
 		for (int i = 0; i < inventory.getSize(); i++)
 			switch (i) {
@@ -89,19 +88,19 @@ public class CRInventoryJoin extends CRInventory {
 			
 			if (arena.getGameState() == GameState.UNREADY) {
 				icon = new InventoryItem(new ItemStackManager(Material.GRAY_DYE));
-				icon.getItem().setDisplayName(ChatColor.GOLD + arenas.get(i));
+				icon.getItem().displayName(Utils.coloredComponent("&6" + arenas.get(i)));
 				icon.getItem().addToLore(local.get(Messages.KEYWORD_GAMESTATE_UNSET));
 
 			} else if (arena.getGameState() == GameState.ACTIVE || arena.getGameState() == GameState.ENDING) {
 				icon = new InventoryItem(new ItemStackManager(Material.RED_DYE));
-				icon.getItem().setDisplayName(ChatColor.GOLD + arenas.get(i));
+				icon.getItem().displayName(Utils.coloredComponent("&6" + arenas.get(i)));
 				icon.getItem().addToLore(local.get(Messages.KEYWORD_GAMESTATE_ACTIVE));
 
 			} else {
 				icon = new InventoryItem(new ItemStackManager(Material.LIME_DYE));
-				icon.getItem().setDisplayName(ChatColor.GOLD + arenas.get(i));
+				icon.getItem().displayName(Utils.coloredComponent("&6" + arenas.get(i)));
 				icon.getItem().addToLore(local.get(Messages.KEYWORD_GAMESTATE_READY));
-				icon.getItem().addToLore(ChatColor.YELLOW + local.get(Messages.KEYWORD_SCOREBOARD_PLAYERS) + " : "
+				icon.getItem().addToLore(Utils.color("&e") + local.get(Messages.KEYWORD_SCOREBOARD_PLAYERS) + " : "
 						+ String.valueOf(arena.getAmountOfPlayerInGame()) + "/" + arena.getMaxPlayer());
 			}
 
@@ -165,7 +164,7 @@ public class CRInventoryJoin extends CRInventory {
 			return;
 		}
 
-		Arena arena = Arena.getArena(ChatColor.stripColor(itemName));
+		Arena arena = Arena.getArena(Utils.strip(itemName));
 		if (arena == null)
 			return;
 

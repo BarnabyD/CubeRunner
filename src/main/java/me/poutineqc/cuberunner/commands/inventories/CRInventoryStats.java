@@ -7,7 +7,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.inventory.ItemStack;
@@ -52,7 +51,7 @@ public class CRInventoryStats extends CRInventory {
 		 ***************************************************/
 
 		icon = new InventoryItem(new ItemStackManager(Material.CYAN_STAINED_GLASS_PANE));
-		icon.getItem().setDisplayName(ChatColor.RED + "");
+		icon.getItem().setDisplayName("");
 
 		for (int i = 0; i < inventory.getSize(); i++)
 			switch (i) {
@@ -81,17 +80,16 @@ public class CRInventoryStats extends CRInventory {
 		NumberFormat format3 = new DecimalFormat("#0.000");
 		
 		icon = new InventoryItem(new ItemStackManager(Material.PAPER), 2);
-		icon.getItem().setDisplayName(
-				ChatColor.translateAlternateColorCodes('&', local.get(Messages.STATS_GUI_TITLE) + " : CubeRunner"));
+		icon.getItem().displayName(Utils.coloredComponent("&6&l" + local.get(Messages.STATS_GUI_TITLE) + " : &bCubeRunner"));
 
-		icon.getItem().addToLore(ChatColor.STRIKETHROUGH + "" + ChatColor.YELLOW + "----------------------------");
+		icon.getItem().addToLore(Utils.color("&m&7----------------------------"));
 		icon.getItem().addToLore(local.get(Messages.STATS_INFO_AVERAGE_SCORE) + " : &e"
 				+ format2.format(crPlayer.getDouble(CRStats.AVERAGE_SCORE)));
 		icon.getItem()
 				.addToLore(local.get(Messages.STATS_INFO_DISTANCE_RAN) + " : &e"
-						+ format3.format(crPlayer.getDouble(CRStats.TOTAL_DISTANCE) / 1000) + " " + ChatColor.GREEN
+						+ format3.format(crPlayer.getDouble(CRStats.TOTAL_DISTANCE) / 1000) + " &a"
 						+ local.get(Messages.KEYWORD_GENERAL_DISTANCE));
-		icon.getItem().addToLore(ChatColor.STRIKETHROUGH + "" + ChatColor.YELLOW + "----------------------------");
+		icon.getItem().addToLore(Utils.color("&m&7----------------------------"));
 		icon.getItem().addToLore(
 				local.get(Messages.STATS_INFO_GAMES) + " : &e" + String.valueOf(crPlayer.getInt(CRStats.GAMES_PLAYED)));
 		icon.getItem().addToLore(local.get(Messages.STATS_INFO_TOTAL_SCORE) + " : &e"
@@ -100,13 +98,13 @@ public class CRInventoryStats extends CRInventory {
 				local.get(Messages.STATS_INFO_KILLS) + " : &e" + String.valueOf(crPlayer.getInt(CRStats.KILLS)));
 		icon.getItem().addToLore(local.get(Messages.STATS_INFO_MULTIPLAYER_WON) + " : &e"
 				+ String.valueOf(crPlayer.getInt(CRStats.MULTIPLAYER_WON)));
-		icon.getItem().addToLore(ChatColor.STRIKETHROUGH + "" + ChatColor.YELLOW + "----------------------------");
-		icon.getItem().addToLore(ChatColor.LIGHT_PURPLE + Utils.strip(local.get(Messages.STATS_INFO_TIME_PLAYED)) + ": "
+		icon.getItem().addToLore(Utils.color("&m&7----------------------------"));
+		icon.getItem().addToLore(Utils.color("&d") + Utils.strip(local.get(Messages.STATS_INFO_TIME_PLAYED)) + ": "
 				+ getTimePLayed(local, crPlayer.getInt(CRStats.TIME_PLAYED)));
 		if (CubeRunner.get().isEconomyEnabled())
 			icon.getItem()
-					.addToLore(ChatColor.LIGHT_PURPLE + Utils.strip(local.get(Messages.STATS_INFO_MONEY)) + ": &e"
-							+ format2.format(crPlayer.getDouble(CRStats.MONEY)) + ChatColor.GREEN
+					.addToLore(Utils.color("&d") + Utils.strip(local.get(Messages.STATS_INFO_MONEY)) + ": &e"
+							+ format2.format(crPlayer.getDouble(CRStats.MONEY)) + " &a"
 							+ CubeRunner.get().getEconomy().currencyNamePlural());
 
 		icon.addToInventory(inventory);
@@ -118,12 +116,12 @@ public class CRInventoryStats extends CRInventory {
 		int position = 0;
 		for (Top10 top : Top10.values()) {
 			icon = new InventoryItem(new ItemStackManager(Material.PAPER));
-			icon.getItem().setDisplayName(top.getName(local));
-			icon.getItem().addToLore(ChatColor.STRIKETHROUGH + "" + ChatColor.YELLOW + "----------------------------");
+			icon.getItem().displayName(Utils.coloredComponent(top.getName(local)));
+			icon.getItem().addToLore(Utils.color("&m&7----------------------------"));
 
 			List<CRPlayer> view = CubeRunner.get().getPlayerData().getViews().get(top.getCrStats()).getList();
 			for (int i = 0; i < 10 && i < view.size(); i++)
-				icon.getItem().addToLore(ChatColor.LIGHT_PURPLE + view.get(i).getName() + " : " + ChatColor.YELLOW
+				icon.getItem().addToLore(Utils.color("&d") + view.get(i).getName() + " : &e"
 						+ top.getAmount(view.get(i)));
 
 			icon.setPosition(position);
@@ -143,26 +141,23 @@ public class CRInventoryStats extends CRInventory {
 
 			for (Entry<Integer, Double> goal : entries.get(achievement).entrySet()) {
 
-			boolean done = goal.getKey() <= crPlayer.getInt(achievement.getCrStats());
+		boolean done = goal.getKey() <= crPlayer.getInt(achievement.getCrStats());
 
-			icon = new InventoryItem(new ItemStackManager(done ? Material.LIME_DYE : Material.GRAY_DYE));
-			icon.getItem().setDisplayName((done ? ChatColor.GREEN : ChatColor.RED) + Utils.strip(local
-					.get(achievement.getAchievementMessage()).replace("%amount%", String.valueOf(goal.getKey()))));
-				icon.getItem().addToLore(ChatColor.YELLOW + "----------------------------");
+		icon = new InventoryItem(new ItemStackManager(done ? Material.LIME_DYE : Material.GRAY_DYE));
+		icon.getItem().displayName(Utils.coloredComponent((done ? "&a" : "&c") + Utils.strip(local.get(achievement.getAchievementMessage()).replace("%amount%", String.valueOf(goal.getKey())))));
+			icon.getItem().addToLore(Utils.color("&7----------------------------"));
 				icon.getItem()
-						.addToLore(ChatColor.AQUA + Utils.strip(local.get(Messages.KEYWORD_STATS_PROGRESSION) + ": ")
-								+ (done ? (ChatColor.GREEN + Utils.strip(local.get(Messages.KEYWORD_STATS_COMPLETED)))
-										: ChatColor.YELLOW + String.valueOf(crPlayer.getInt(achievement.getCrStats())) + "/"
+						.addToLore(Utils.color("&b") + Utils.strip(local.get(Messages.KEYWORD_STATS_PROGRESSION) + ": ")
+								+ (done ? (Utils.color("&a") + Utils.strip(local.get(Messages.KEYWORD_STATS_COMPLETED)))
+										: Utils.color("&e") + String.valueOf(crPlayer.getInt(achievement.getCrStats())) + "/"
 												+ String.valueOf(goal.getKey())));
 
-				if (!done && CubeRunner.get().isEconomyEnabled()
-						&& CubeRunner.get().getConfiguration().achievementsRewards)
-					icon.getItem()
-							.addToLore(ChatColor.AQUA + Utils.strip(local.get(Messages.KEYWORD_STATS_REWARD)) + ": "
-									+ ChatColor.YELLOW + String.valueOf(goal.getValue())
-									+ CubeRunner.get().getEconomy().currencyNamePlural());
-
-				icon.setPosition(location++);
+			if (!done && CubeRunner.get().isEconomyEnabled()
+					&& CubeRunner.get().getConfiguration().achievementsRewards)
+				icon.getItem()
+						.addToLore(Utils.color("&b") + Utils.strip(local.get(Messages.KEYWORD_STATS_REWARD)) + ": "
+								+ Utils.color("&e") + String.valueOf(goal.getValue())
+								+ CubeRunner.get().getEconomy().currencyNamePlural());				icon.setPosition(location++);
 				icon.addToInventory(inventory);
 
 			}
@@ -176,7 +171,7 @@ public class CRInventoryStats extends CRInventory {
 
 		icon = new InventoryItem(new ItemStackManager(Material.ARROW));
 
-		icon.getItem().setDisplayName(local.get(Messages.STATS_CHALLENGES_TITLE));
+		icon.getItem().displayName(Utils.coloredComponent(local.get(Messages.STATS_CHALLENGES_TITLE)));
 
 		icon.setPosition(8);
 		icon.addToInventory(inventory);
@@ -198,9 +193,9 @@ public class CRInventoryStats extends CRInventory {
 			hours++;
 		}
 
-		return ChatColor.YELLOW + String.valueOf(hours) + ChatColor.GREEN + " "
-				+ Utils.strip(local.get(Messages.KEYWORD_GENERAL_HOURS)) + ChatColor.YELLOW + " "
-				+ String.valueOf(timePlayed) + ChatColor.GREEN + " "
+		return Utils.color("&e") + String.valueOf(hours) + Utils.color("&a") + " "
+				+ Utils.strip(local.get(Messages.KEYWORD_GENERAL_HOURS)) + Utils.color("&e") + " "
+				+ String.valueOf(timePlayed) + Utils.color("&a") + " "
 				+ Utils.strip(local.get(Messages.KEYWORD_GENERAL_MINUTES));
 	}
 
@@ -219,7 +214,7 @@ public class CRInventoryStats extends CRInventory {
 			@Override
 			public String getAmount(CRPlayer player) {
 				try {
-					return ChatColor.YELLOW + new DecimalFormat("#0.00").format(player.getDouble(getCrStats()));
+					return Utils.color("&e") + new DecimalFormat("#0.00").format(player.getDouble(getCrStats()));
 				} catch (PlayerStatsException e) {
 					e.printStackTrace();
 					return "";
@@ -230,8 +225,8 @@ public class CRInventoryStats extends CRInventory {
 			@Override
 			public String getAmount(CRPlayer player) {
 				try {
-					return ChatColor.YELLOW + new DecimalFormat("#0.000").format(player.getDouble(getCrStats()) / 1000) + " "
-							+ ChatColor.GREEN + player.getLanguage().get(Messages.KEYWORD_GENERAL_DISTANCE);
+					return Utils.color("&e") + new DecimalFormat("#0.000").format(player.getDouble(getCrStats()) / 1000) + " &a"
+							+ player.getLanguage().get(Messages.KEYWORD_GENERAL_DISTANCE);
 				} catch (PlayerStatsException e) {
 					e.printStackTrace();
 					return "";
@@ -294,7 +289,7 @@ public class CRInventoryStats extends CRInventory {
 		public abstract String getAmount(CRPlayer player);
 
 		public String getName(Language local) {
-			return ChatColor.GOLD + local.get(Messages.KEYWORD_STATS_TOP10) + " : " + local.get(message);
+			return Utils.color("&6") + local.get(Messages.KEYWORD_STATS_TOP10) + " : " + local.get(message);
 		}
 
 		public CRStats getCrStats() {

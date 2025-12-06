@@ -1,11 +1,15 @@
 package me.poutineqc.cuberunner.listeners;
 
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.FallingBlock;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
+import org.bukkit.persistence.PersistentDataType;
+
+import me.poutineqc.cuberunner.CubeRunner;
 
 public class ListenerEntityChangeBlock implements Listener {
 
@@ -14,10 +18,11 @@ public class ListenerEntityChangeBlock implements Listener {
 		if ((event.getEntity() instanceof FallingBlock)) {
 			FallingBlock fallingBlock = (FallingBlock) event.getEntity();
 			// Check if block is a wool variant (modern materials use individual color constants)
-			String materialName = fallingBlock.getMaterial().toString();
+			String materialName = fallingBlock.getBlockData().getMaterial().toString();
 			if (materialName.endsWith("_WOOL") && (event.getBlock().getType() == Material.AIR)) {
-				if (fallingBlock.getCustomName()
-						.matches("[a-f0-9]{8}-[a-f0-9]{4}-4[0-9]{3}-[89ab][a-f0-9]{3}-[0-9a-f]{12}"))
+				// Check if this is a CubeRunner falling block using persistent data
+				NamespacedKey key = new NamespacedKey(CubeRunner.get(), "player-uuid");
+				if (fallingBlock.getPersistentDataContainer().has(key, PersistentDataType.STRING))
 					event.setCancelled(false);
 			}
 		}

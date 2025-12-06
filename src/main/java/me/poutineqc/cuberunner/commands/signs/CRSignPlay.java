@@ -2,7 +2,6 @@ package me.poutineqc.cuberunner.commands.signs;
 
 import java.util.UUID;
 
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
@@ -14,6 +13,7 @@ import me.poutineqc.cuberunner.Language.Messages;
 import me.poutineqc.cuberunner.commands.CRCommand;
 import me.poutineqc.cuberunner.game.Arena;
 import me.poutineqc.cuberunner.utils.Permissions;
+import me.poutineqc.cuberunner.utils.Utils;
 
 public class CRSignPlay extends CRSignPlayers {
 
@@ -23,22 +23,22 @@ public class CRSignPlay extends CRSignPlayers {
 
 		Language local = Language.getDefault();
 
-		event.setLine(0, ChatColor.translateAlternateColorCodes('&', local.get(Messages.PREFIX_LONG)));
-		event.setLine(1, ChatColor.translateAlternateColorCodes('&', local.get(Messages.KEYWORD_SIGN_PLAY)));
+		event.setLine(0, Utils.color(local.get(Messages.PREFIX_LONG)));
+		event.setLine(1, Utils.color(local.get(Messages.KEYWORD_SIGN_PLAY)));
 		switch (arena.getGameState()) {
 		case ACTIVE:
 		case ENDING:
-			event.setLine(3, ChatColor.translateAlternateColorCodes('&', local.get(Messages.KEYWORD_GAMESTATE_ACTIVE)));
+			event.setLine(3, Utils.color(local.get(Messages.KEYWORD_GAMESTATE_ACTIVE)));
 			break;
 		case READY:
 		case STARTUP:
 			event.setLine(3,
-					ChatColor.stripColor(ChatColor.translateAlternateColorCodes('&', local.get(Messages.KEYWORD_SCOREBOARD_PLAYERS)))
+					Utils.strip(local.get(Messages.KEYWORD_SCOREBOARD_PLAYERS))
 							+ " : " + String.valueOf(arena.getAmountOfPlayerInGame()) + "/"
 							+ String.valueOf(arena.getMaxPlayer()));
 			break;
 		case UNREADY:
-			event.setLine(3, ChatColor.translateAlternateColorCodes('&', local.get(Messages.KEYWORD_GAMESTATE_UNSET)));
+			event.setLine(3, Utils.color(local.get(Messages.KEYWORD_GAMESTATE_UNSET)));
 			break;
 		}
 
@@ -80,8 +80,8 @@ public class CRSignPlay extends CRSignPlayers {
 
 	@Override
 	protected boolean updateSign(Language local, Sign sign) {
-		sign.setLine(0, ChatColor.translateAlternateColorCodes('&', local.get(Messages.PREFIX_LONG)));
-		sign.setLine(1, ChatColor.translateAlternateColorCodes('&', local.get(Messages.KEYWORD_SIGN_PLAY)));
+		sign.line(0, Utils.coloredComponent(local.get(Messages.PREFIX_LONG)));
+		sign.line(1, Utils.coloredComponent(local.get(Messages.KEYWORD_SIGN_PLAY)));
 		sign.update();
 
 		if (arena == null)

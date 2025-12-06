@@ -2,7 +2,6 @@ package me.poutineqc.cuberunner.commands.signs;
 
 import java.util.UUID;
 
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
@@ -13,6 +12,7 @@ import me.poutineqc.cuberunner.Language;
 import me.poutineqc.cuberunner.Language.Messages;
 import me.poutineqc.cuberunner.commands.CRCommand;
 import me.poutineqc.cuberunner.utils.Permissions;
+import me.poutineqc.cuberunner.utils.Utils;
 
 public class CRSignStats extends CRSign {
 
@@ -20,10 +20,10 @@ public class CRSignStats extends CRSign {
 		super(event.getBlock().getLocation(), SignType.STATS);
 
 		Language local = Language.getDefault();
-		event.setLine(0, "");
-		event.setLine(1, ChatColor.translateAlternateColorCodes('&', local.get(Messages.PREFIX_LONG)));
-		event.setLine(2, ChatColor.translateAlternateColorCodes('&', local.get(Messages.KEYWORD_SIGN_STATS)));
-		event.setLine(3, "");
+		event.line(0, Utils.coloredComponent(""));
+		event.line(1, Utils.coloredComponent(local.get(Messages.PREFIX_LONG)));
+		event.line(2, Utils.coloredComponent(local.get(Messages.KEYWORD_SIGN_STATS)));
+		event.line(3, Utils.coloredComponent(""));
 
 		signs.add(this);
 
@@ -52,8 +52,8 @@ public class CRSignStats extends CRSign {
 
 	@Override
 	protected boolean updateSign(Language local, Sign sign) {
-		sign.setLine(1, ChatColor.translateAlternateColorCodes('&', local.get(Messages.PREFIX_LONG)));
-		sign.setLine(2, ChatColor.translateAlternateColorCodes('&', local.get(Messages.KEYWORD_SIGN_STATS)));
+		sign.line(1, Utils.coloredComponent(local.get(Messages.PREFIX_LONG)));
+		sign.line(2, Utils.coloredComponent(local.get(Messages.KEYWORD_SIGN_STATS)));
 		sign.update();
 
 		return true;

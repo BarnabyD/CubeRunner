@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang3.StringUtils;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 import me.poutineqc.cuberunner.CubeRunner;
@@ -31,23 +30,21 @@ public enum CRCommand {
 			String header = Utils.color("&8&m" + StringUtils.repeat(" ", 15) + "&r&8| &5CubeRunner &d"
 					+ local.get(Messages.KEYWORD_HELP) + "&8&m|" + StringUtils.repeat(" ", 35));
 
-			if (args.length == 1) {
-				player.sendMessage(ChatColor.translateAlternateColorCodes('&', header));
-				player.sendMessage(ChatColor.translateAlternateColorCodes('&',
-						"&5/" + cmdValue + " help general &8- " + local.get(Messages.HELP_DESCRIPTION_GENERALL)));
-				player.sendMessage(ChatColor.translateAlternateColorCodes('&',
-						"&5/" + cmdValue + " help game &8- " + local.get(Messages.HELP_DESCRIPTION_GAME)));
-				player.sendMessage(ChatColor.translateAlternateColorCodes('&',
-						"&5/" + cmdValue + " help arena &8- " + local.get(Messages.HELP_DESCRIPTION_ARENA)));
-				player.sendMessage(ChatColor.translateAlternateColorCodes('&',
-						"&5/" + cmdValue + " help admin &8- " + local.get(Messages.HELP_DESCRIPTION_ADMIN)));
-				player.sendMessage(ChatColor.translateAlternateColorCodes('&',
-						"&5/" + cmdValue + " help all &8- " + local.get(Messages.HELP_DESCRIPTION_ALL)));
-				player.sendMessage("\n");
-				return;
-			}
-
-			int pageNumber = 1;
+		if (args.length == 1) {
+			player.sendMessage(Utils.coloredComponent(header));
+			player.sendMessage(Utils.coloredComponent(
+					"&5/" + cmdValue + " help general &8- " + local.get(Messages.HELP_DESCRIPTION_GENERALL)));
+			player.sendMessage(Utils.coloredComponent(
+					"&5/" + cmdValue + " help game &8- " + local.get(Messages.HELP_DESCRIPTION_GAME)));
+			player.sendMessage(Utils.coloredComponent(
+					"&5/" + cmdValue + " help arena &8- " + local.get(Messages.HELP_DESCRIPTION_ARENA)));
+			player.sendMessage(Utils.coloredComponent(
+					"&5/" + cmdValue + " help admin &8- " + local.get(Messages.HELP_DESCRIPTION_ADMIN)));
+			player.sendMessage(Utils.coloredComponent(
+					"&5/" + cmdValue + " help all &8- " + local.get(Messages.HELP_DESCRIPTION_ALL)));
+			player.sendMessage("\n");
+			return;
+		}			int pageNumber = 1;
 			CRCommandType commandType = null;
 			List<CRCommand> requestedCommands;
 
@@ -92,25 +89,23 @@ public enum CRCommand {
 				}
 			}
 
-			if (requestedCommands.size() == 0)
-				pageNumber = 0;
+		if (requestedCommands.size() == 0)
+			pageNumber = 0;
 
-			player.sendMessage(ChatColor.translateAlternateColorCodes('&', header));
-			player.sendMessage(ChatColor.translateAlternateColorCodes('&',
-					"&5" + local.get(Messages.KEYWORD_HELP_CATEGORY) + ": &7"
-							+ (commandType == null ? "ALL" : commandType.toString()) + ", &5"
-							+ local.get(Messages.KEYWORD_HELP_PAGE) + ": &7" + String.valueOf(pageNumber) + "&8/&7"
-							+ (int) (Math.ceil((double) requestedCommands.size() / 3))));
-
-			if (pageNumber == 0) {
+		player.sendMessage(Utils.coloredComponent(header));
+		player.sendMessage(Utils.coloredComponent(
+				"&5" + local.get(Messages.KEYWORD_HELP_CATEGORY) + ": &7"
+						+ (commandType == null ? "ALL" : commandType.toString()) + ", &5"
+						+ local.get(Messages.KEYWORD_HELP_PAGE) + ": &7" + String.valueOf(pageNumber) + "&8/&7"
+						+ (int) (Math.ceil((double) requestedCommands.size() / 3))));			if (pageNumber == 0) {
 				local.sendMsg(player, local.get(Messages.HELP_ERROR_PERMISSION));
 				return;
 			}
 
 			for (int i = 3 * (pageNumber - 1); i < requestedCommands.size() && i < (3 * (pageNumber - 1)) + 3; i++) {
-				player.sendMessage(ChatColor.translateAlternateColorCodes('&',
+				player.sendMessage(Utils.coloredComponent(
 						"&5" + requestedCommands.get(i).getUsage().replace("%command%", cmdValue)));
-				player.sendMessage(ChatColor.translateAlternateColorCodes('&',
+				player.sendMessage(Utils.coloredComponent(
 						" &8- &7" + local.get(requestedCommands.get(i).getDescription())));
 			}
 			player.sendMessage("\n");
@@ -359,7 +354,7 @@ public enum CRCommand {
 		try {
 			arena.setArena(player);
 		} catch (com.sk89q.worldedit.IncompleteRegionException e) {
-			local.sendMsg(player, ChatColor.RED + "Error: " + e.getMessage());
+			local.sendMsg(player, Utils.color("&cError: ") + e.getMessage());
 		}
 	}		@Override
 		public void complete(List<String> tabCompletion, String[] args) {

@@ -4,7 +4,6 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Map.Entry;
 
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.inventory.ItemStack;
@@ -48,7 +47,7 @@ public class CRInventoryChallenge extends CRInventory {
 		 ***************************************************/
 
 		icon = new InventoryItem(new ItemStackManager(Material.CYAN_STAINED_GLASS_PANE));
-		icon.getItem().setDisplayName(ChatColor.RED + "");
+		icon.getItem().setDisplayName("");
 
 		for (int i = 0; i < inventory.getSize(); i++)
 			switch (i) {
@@ -73,17 +72,16 @@ public class CRInventoryChallenge extends CRInventory {
 		NumberFormat format3 = new DecimalFormat("#0.000");
 		
 		icon = new InventoryItem(new ItemStackManager(Material.PAPER), 4);
-		icon.getItem().setDisplayName(
-				ChatColor.translateAlternateColorCodes('&', local.get(Messages.STATS_GUI_TITLE) + " : CubeRunner"));
+		icon.getItem().displayName(Utils.coloredComponent("&6&l" + local.get(Messages.STATS_GUI_TITLE) + " : &bCubeRunner"));
 
-		icon.getItem().addToLore(ChatColor.STRIKETHROUGH + "" + ChatColor.YELLOW + "----------------------------");
+		icon.getItem().addToLore(Utils.color("&m&7----------------------------"));
 		icon.getItem().addToLore(local.get(Messages.STATS_INFO_AVERAGE_SCORE) + " : &e"
 				+ format2.format(crPlayer.getDouble(CRStats.AVERAGE_SCORE)));
 		icon.getItem()
 				.addToLore(local.get(Messages.STATS_INFO_DISTANCE_RAN) + " : &e"
-						+ format3.format(crPlayer.getDouble(CRStats.TOTAL_DISTANCE) / 1000) + " " + ChatColor.GREEN
+						+ format3.format(crPlayer.getDouble(CRStats.TOTAL_DISTANCE) / 1000) + " &a"
 						+ local.get(Messages.KEYWORD_GENERAL_DISTANCE));
-		icon.getItem().addToLore(ChatColor.STRIKETHROUGH + "" + ChatColor.YELLOW + "----------------------------");
+		icon.getItem().addToLore(Utils.color("&m&7----------------------------"));
 		icon.getItem().addToLore(
 				local.get(Messages.STATS_INFO_GAMES) + " : &e" + String.valueOf(crPlayer.getInt(CRStats.GAMES_PLAYED)));
 		icon.getItem().addToLore(local.get(Messages.STATS_INFO_TOTAL_SCORE) + " : &e"
@@ -92,13 +90,13 @@ public class CRInventoryChallenge extends CRInventory {
 				local.get(Messages.STATS_INFO_KILLS) + " : &e" + String.valueOf(crPlayer.getInt(CRStats.KILLS)));
 		icon.getItem().addToLore(local.get(Messages.STATS_INFO_MULTIPLAYER_WON) + " : &e"
 				+ String.valueOf(crPlayer.getInt(CRStats.MULTIPLAYER_WON)));
-		icon.getItem().addToLore(ChatColor.STRIKETHROUGH + "" + ChatColor.YELLOW + "----------------------------");
-		icon.getItem().addToLore(ChatColor.LIGHT_PURPLE + Utils.strip(local.get(Messages.STATS_INFO_TIME_PLAYED)) + ": "
+		icon.getItem().addToLore(Utils.color("&m&7----------------------------"));
+		icon.getItem().addToLore(Utils.color("&d") + Utils.strip(local.get(Messages.STATS_INFO_TIME_PLAYED)) + ": "
 				+ getTimePLayed(local, crPlayer.getInt(CRStats.TIME_PLAYED)));
 		if (CubeRunner.get().isEconomyEnabled())
 			icon.getItem()
-					.addToLore(ChatColor.LIGHT_PURPLE + Utils.strip(local.get(Messages.STATS_INFO_MONEY)) + ": &e"
-							+ format2.format(crPlayer.getDouble(CRStats.MONEY)) + ChatColor.GREEN
+					.addToLore(Utils.color("&d") + Utils.strip(local.get(Messages.STATS_INFO_MONEY)) + ": &e"
+							+ format2.format(crPlayer.getDouble(CRStats.MONEY)) + " &a"
 							+ CubeRunner.get().getEconomy().currencyNamePlural());
 
 		icon.addToInventory(inventory);
@@ -114,18 +112,18 @@ public class CRInventoryChallenge extends CRInventory {
 			
 			boolean done = crPlayer.hasChallenge(challenge.getKey().getCrStats());
 			icon = new InventoryItem(new ItemStackManager(done ? Material.LIME_DYE : Material.GRAY_DYE));
-			icon.getItem().setDisplayName(
-					(done ? (ChatColor.GREEN + "") : (ChatColor.RED + "")) + Utils.strip(local.get(challenge.getKey().getMessage())));
-			icon.getItem().addToLore(ChatColor.YELLOW + "----------------------------");
+			icon.getItem().displayName(Utils.coloredComponent(
+					(done ? "&a" : "&c") + Utils.strip(local.get(challenge.getKey().getMessage()))));
+			icon.getItem().addToLore(Utils.color("&7----------------------------"));
 			icon.getItem()
-					.addToLore(ChatColor.AQUA + Utils.strip(local.get(Messages.KEYWORD_STATS_PROGRESSION)) + ": "
-							+ (done ? (ChatColor.GREEN + Utils.strip(local.get(Messages.KEYWORD_STATS_COMPLETED)))
-									: (ChatColor.RED + Utils.strip(local.get(Messages.KEYWORD_STATS_NOT_COMPLETED)))));
+					.addToLore(Utils.color("&b") + Utils.strip(local.get(Messages.KEYWORD_STATS_PROGRESSION)) + ": "
+							+ (done ? (Utils.color("&a") + Utils.strip(local.get(Messages.KEYWORD_STATS_COMPLETED)))
+									: (Utils.color("&c") + Utils.strip(local.get(Messages.KEYWORD_STATS_NOT_COMPLETED)))));
 			if (!done && CubeRunner.get().isEconomyEnabled() && CubeRunner.get().getConfiguration().achievementsRewards)
-				icon.getItem().addToLore(ChatColor.AQUA
-						+ ChatColor.stripColor(ChatColor.translateAlternateColorCodes('&',
+				icon.getItem().addToLore(Utils.color("&b")
+						+ Utils.strip(Utils.color(
 								local.get(Messages.KEYWORD_STATS_REWARD) + ": "))
-						+ ChatColor.YELLOW + String.valueOf(challenge.getValue())
+						+ Utils.color("&e") + String.valueOf(challenge.getValue())
 						+ CubeRunner.get().getEconomy().currencyNamePlural());
 
 			icon.setPosition(location++);
@@ -138,7 +136,7 @@ public class CRInventoryChallenge extends CRInventory {
 
 		icon = new InventoryItem(new ItemStackManager(Material.ARROW));
 
-		icon.getItem().setDisplayName(local.get(Messages.STATS_GUI_TITLE));
+		icon.getItem().displayName(Utils.coloredComponent(local.get(Messages.STATS_GUI_TITLE)));
 
 		icon.setPosition(8);
 		icon.addToInventory(inventory);
@@ -160,9 +158,9 @@ public class CRInventoryChallenge extends CRInventory {
 			hours++;
 		}
 
-		return ChatColor.YELLOW + String.valueOf(hours) + ChatColor.GREEN + " "
-				+ Utils.strip(local.get(Messages.KEYWORD_GENERAL_HOURS)) + ChatColor.YELLOW + " "
-				+ String.valueOf(timePlayed) + ChatColor.GREEN + " "
+		return Utils.color("&e") + String.valueOf(hours) + Utils.color("&a") + " "
+				+ Utils.strip(local.get(Messages.KEYWORD_GENERAL_HOURS)) + Utils.color("&e") + " "
+				+ String.valueOf(timePlayed) + Utils.color("&a") + " "
 				+ Utils.strip(local.get(Messages.KEYWORD_GENERAL_MINUTES));
 	}
 

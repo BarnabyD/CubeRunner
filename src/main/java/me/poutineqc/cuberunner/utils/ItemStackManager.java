@@ -6,11 +6,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+
+import net.kyori.adventure.text.Component;
 
 public class ItemStackManager {
 
@@ -31,9 +32,24 @@ public class ItemStackManager {
 
 		ItemMeta meta = itemStack.getItemMeta();
 		if (meta != null) {
-			this.name = meta.hasDisplayName() ? meta.getDisplayName() : null;
+			if (meta.hasDisplayName()) {
+				// Convert Component display name back to string with color codes
+				Component displayComponent = meta.displayName();
+				if (displayComponent != null) {
+					this.name = Utils.componentToColorString(displayComponent);
+				}
+			}
 			this.enchantments = meta.hasEnchants() ? meta.getEnchants() : new HashMap<Enchantment, Integer>();
-			this.lore = meta.hasLore() ? meta.getLore() : null;
+			if (meta.hasLore()) {
+				// Convert Component lore back to strings with color codes
+				List<Component> componentLore = meta.lore();
+				if (componentLore != null) {
+					this.lore = new ArrayList<>();
+					for (Component component : componentLore) {
+						this.lore.add(Utils.componentToColorString(component));
+					}
+				}
+			}
 		}
 	}
 
@@ -43,10 +59,14 @@ public class ItemStackManager {
 		ItemMeta meta = itemStack.getItemMeta();
 		if (meta != null) {
 			if (name != null) {
-				meta.setDisplayName(name);
+				meta.displayName(Utils.coloredComponent(name));
 			}
 			if (lore != null && !lore.isEmpty()) {
-				meta.setLore(lore);
+				List<Component> componentLore = new ArrayList<>();
+				for (String loreLine : lore) {
+					componentLore.add(Utils.coloredComponent(loreLine));
+				}
+				meta.lore(componentLore);
 			}
 			for (Entry<Enchantment, Integer> enchantment : enchantments.entrySet())
 				meta.addEnchant(enchantment.getKey(), enchantment.getValue(), true);
@@ -68,7 +88,12 @@ public class ItemStackManager {
 			if (name == null)
 				return false;
 			
-			if (!Utils.isEqualOnColorStrip(meta.getDisplayName(), name))
+			Component displayComponent = meta.displayName();
+			if (displayComponent == null)
+				return false;
+			
+			String metaDisplayName = Utils.componentToColorString(displayComponent);
+			if (!Utils.isEqualOnColorStrip(metaDisplayName, name))
 				return false;
 			
 		} else if (name != null)
@@ -85,11 +110,15 @@ public class ItemStackManager {
 	}
 
 	public void setDisplayName(String displayName) {
-		this.name = ChatColor.translateAlternateColorCodes('&', displayName);
+		this.name = Utils.color(displayName);
+	}
+
+	public void displayName(Component displayNameComponent) {
+		this.name = Utils.componentToColorString(displayNameComponent);
 	}
 
 	public void addToLore(String loreLine) {
-		lore.add(ChatColor.translateAlternateColorCodes('&', loreLine));
+		lore.add(Utils.color(loreLine));
 	}
 
 	public void setLore(List<String> lore) {

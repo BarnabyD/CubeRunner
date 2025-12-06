@@ -3,11 +3,12 @@ package me.poutineqc.cuberunner;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 
 import me.poutineqc.cuberunner.game.User;
 import me.poutineqc.cuberunner.utils.MinecraftConfiguration;
+import me.poutineqc.cuberunner.utils.Utils;
 
 public class Language {
 	private static HashMap<String, Language> languages;
@@ -50,9 +51,9 @@ public class Language {
 
 	public void sendMsg(Player player, String message) {
 		if (CubeRunner.get().getConfiguration().prefixInFrontOfEveryMessages)
-			player.sendMessage(ChatColor.translateAlternateColorCodes('&', get(Messages.PREFIX_SHORT) + " " + message));
+			player.sendMessage(Utils.coloredComponent(get(Messages.PREFIX_SHORT) + " " + message));
 		else
-			player.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
+			player.sendMessage(Utils.coloredComponent(message));
 	}
 
 	public void sendMsg(User user, String message) {

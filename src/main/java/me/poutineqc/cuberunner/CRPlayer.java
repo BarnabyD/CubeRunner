@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 
@@ -62,7 +61,7 @@ public class CRPlayer {
 				this.stats.put(stats, stats.getValue(query));
 
 		} catch (SQLException e) {
-			Bukkit.getServer().getLogger().severe(ChatColor.RED + "Could read some informations from playerData.ylm.");
+			Bukkit.getServer().getLogger().severe("Could read some informations from playerData.yml.");
 		}
 		
 		CubeRunner.get().updateAll(this);
