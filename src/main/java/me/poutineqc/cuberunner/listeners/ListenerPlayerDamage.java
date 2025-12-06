@@ -3,12 +3,15 @@ package me.poutineqc.cuberunner.listeners;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
+import org.bukkit.NamespacedKey;
+import org.bukkit.entity.FallingBlock;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.persistence.PersistentDataType;
 
 import me.poutineqc.cuberunner.CRStats;
 import me.poutineqc.cuberunner.CubeRunner;
@@ -51,10 +54,18 @@ public class ListenerPlayerDamage implements Listener {
 		event.setDamage(0);
 		arena.eliminateUser(arena.getUser(player), LeavingReason.CRUSHED);
 
-		String dammagerUUID = event.getDamager().getCustomName();
-		if (!dammagerUUID.equalsIgnoreCase(player.getUniqueId().toString()))
-			CubeRunner.get().getCRPlayer(Bukkit.getPlayer(UUID.fromString(dammagerUUID))).increment(CRStats.KILLS,
-					true);
+		// Get the damager UUID from persistent data instead of custom name
+		if (event.getDamager() instanceof FallingBlock) {
+			FallingBlock block = (FallingBlock) event.getDamager();
+			NamespacedKey key = new NamespacedKey(CubeRunner.get(), "player-uuid");
+			String dammagerUUID = block.getPersistentDataContainer().get(key, PersistentDataType.STRING);
+			if (dammagerUUID != null && !dammagerUUID.equalsIgnoreCase(player.getUniqueId().toString())) {
+				Player damager = Bukkit.getPlayer(UUID.fromString(dammagerUUID));
+				if (damager != null) {
+					CubeRunner.get().getCRPlayer(damager).increment(CRStats.KILLS, true);
+				}
+			}
+		}
 	}
 
 	@EventHandler
