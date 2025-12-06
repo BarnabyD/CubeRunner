@@ -7,6 +7,11 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sk89q.worldedit.IncompleteRegionException;
+import com.sk89q.worldedit.WorldEdit;
+import com.sk89q.worldedit.bukkit.BukkitAdapter;
+import com.sk89q.worldedit.bukkit.BukkitPlayer;
+import com.sk89q.worldedit.regions.Region;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -17,6 +22,7 @@ import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.FallingBlock;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
@@ -26,8 +32,6 @@ import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.util.Vector;
 
 import com.google.gson.JsonObject;
-import com.sk89q.worldedit.bukkit.WorldEditPlugin;
-import com.sk89q.worldedit.bukkit.selections.Selection;
 
 import me.poutineqc.cuberunner.ArenaData;
 import me.poutineqc.cuberunner.CRPlayer.PlayerStatsException;
@@ -258,19 +262,30 @@ public class Arena {
 	 * Arena Setup
 	 *********************************************/
 
-	public void setArena(Player player) {
+	public void setArena(Player player) throws IncompleteRegionException {
 		Language local = CubeRunner.get().getCRPlayer(player).getLanguage();
 
-		Selection s = getWorldEdit().getSelection(player);
-		if (s == null) {
+		BukkitPlayer bPlayer = BukkitAdapter.adapt(player);
+        Region rg = WorldEdit.getInstance().getSessionManager().get(bPlayer).getSelection(bPlayer.getWorld());
+
+		if (rg == null) {
 			local.sendMsg(player, local.get(Messages.EDIT_REGION_WORLDEDIT));
 			return;
 		}
 
 		gameState = GameState.UNREADY;
-		world = s.getWorld();
-		minPoint = s.getMinimumPoint();
-		maxPoint = s.getMaximumPoint();
+		
+		// Convert WorldEdit world to Bukkit world
+		com.sk89q.worldedit.world.World weWorld = rg.getWorld();
+		world = Bukkit.getWorld(weWorld.getName());
+		
+		// Get minimum and maximum points
+		com.sk89q.worldedit.math.BlockVector3 min = rg.getMinimumPoint();
+		com.sk89q.worldedit.math.BlockVector3 max = rg.getMaximumPoint();
+		
+		minPoint = new Location(world, min.x(), min.y(), min.z());
+		maxPoint = new Location(world, max.x(), max.y(), max.z());
+		
 		local.sendMsg(player, local.get(Messages.EDIT_REGION).replace("%arena%", name));
 
 		if (mysql.hasConnection()) {
@@ -347,14 +362,6 @@ public class Arena {
 
 		if (isReady())
 			gameState = GameState.READY;
-	}
-
-	private WorldEditPlugin getWorldEdit() {
-		Plugin p = Bukkit.getPluginManager().getPlugin("WorldEdit");
-		if (p instanceof WorldEditPlugin)
-			return (WorldEditPlugin) p;
-		else
-			return null;
 	}
 
 	public void setMinPlayer(int amount, Player player) {
@@ -676,8 +683,7 @@ public class Arena {
 						for (User user : arena.users) {
 							if (cooldownTimer % 20.0 == 0) {
 
-								Sound sound = CubeRunner.aboveOneNine ? Sound.valueOf("UI_BUTTON_CLICK")
-										: Sound.valueOf("CLICK");
+								Sound sound = Sound.UI_BUTTON_CLICK;
 
 								user.getPlayer().playSound(user.getPlayer().getLocation(), sound, 1, 1);
 
@@ -751,41 +757,43 @@ public class Arena {
 
 	}
 
-	@SuppressWarnings("deprecation")
 	private void resetArena() {
 		for (int x = minPoint.getBlockX(); x <= maxPoint.getBlockX(); x++)
 			for (int y = maxPoint.getBlockY(); y >= minPoint.getBlockY(); y--)
 				nextBlock: for (int z = minPoint.getBlockZ(); z <= maxPoint.getBlockZ(); z++) {
 					Location location = new Location(world, x, y, z);
 					Block block = location.getBlock();
-					if (block.getType() != Material.STAINED_CLAY && block.getType() != Material.WOOL)
+					
+					// Check if block is a wool or colored block variant
+					if (!block.getType().toString().endsWith("WOOL") && 
+						block.getType() != Material.TERRACOTTA)
 						continue;
 
 					for (ItemStackManager item : colorManager.getOnlyChoosenBlocks())
-						if (item.getMaterial() == block.getType())
-							if (item.getItem().getDurability() == block.getData()) {
-								block.setType(Material.AIR);
-								continue nextBlock;
-							}
+						if (item.getMaterial() == block.getType()) {
+							block.setType(Material.AIR);
+							continue nextBlock;
+						}
 
 				}
 	}
 
-	@SuppressWarnings("deprecation")
 	public void resetArena(ItemStack item) {
 		for (int x = minPoint.getBlockX(); x <= maxPoint.getBlockX(); x++)
 			for (int y = maxPoint.getBlockY(); y >= minPoint.getBlockY(); y--)
 				nextBlock: for (int z = minPoint.getBlockZ(); z <= maxPoint.getBlockZ(); z++) {
 					Location location = new Location(world, x, y, z);
 					Block block = location.getBlock();
-					if (block.getType() != Material.STAINED_CLAY && block.getType() != Material.WOOL)
+					
+					// Check if block is a wool or colored block variant
+					if (!block.getType().toString().endsWith("WOOL") && 
+						block.getType() != Material.TERRACOTTA)
 						continue;
 
-					if (item.getType() == block.getType())
-						if (item.getDurability() == block.getData()) {
-							block.setType(Material.AIR);
-							continue nextBlock;
-						}
+					if (item.getType() == block.getType()) {
+						block.setType(Material.AIR);
+						continue nextBlock;
+					}
 
 				}
 	}
@@ -835,6 +843,16 @@ public class Arena {
 						l = new Location(player.getWorld(), player.getLocation().getX(), arena.maxPoint.getY(),
 								player.getLocation().getZ());
 
+					// Constrain spawn location to be within arena bounds
+					if (l.getBlockX() < arena.minPoint.getBlockX())
+						l.setX(arena.minPoint.getBlockX() + 0.5);
+					if (l.getBlockX() > arena.maxPoint.getBlockX())
+						l.setX(arena.maxPoint.getBlockX() - 0.5);
+					if (l.getBlockZ() < arena.minPoint.getBlockZ())
+						l.setZ(arena.minPoint.getBlockZ() + 0.5);
+					if (l.getBlockZ() > arena.maxPoint.getBlockZ())
+						l.setZ(arena.maxPoint.getBlockZ() - 0.5);
+
 					NumberFormat formater = new DecimalFormat("#.#####");
 					double xOffset = Double.parseDouble(
 							formater.format(l.getX() > 0 ? l.getX() % 1 : 1 + (l.getX() % 1)).replace(",", "."));
@@ -864,42 +882,24 @@ public class Arena {
 					ItemStackManager itemStack = arena.colorManager.getRandomAvailableBlock();
 
 					try {
-
-						Object craftWorld = Class
-								.forName("org.bukkit.craftbukkit." + CubeRunner.NMS_VERSION + ".CraftWorld")
-								.cast(player.getWorld());
-						Object world = craftWorld.getClass().getMethod("getHandle").invoke(craftWorld);
-
-						@SuppressWarnings("deprecation")
-						Object entityBlock = Utils.getNMSClass("Block").getMethod("getById", int.class).invoke(null,
-								itemStack.getMaterial().getId());
-						Object iBlockData = entityBlock.getClass().getMethod("fromLegacyData", int.class)
-								.invoke(entityBlock, (int) itemStack.getDurability());
-						Object entityFallingBlock = Utils.getNMSClass("EntityFallingBlock")
-								.getConstructor(Utils.getNMSClass("World"), double.class, double.class, double.class,
-										Utils.getNMSClass("IBlockData"))
-								.newInstance(world, l.getX(), l.getY(), l.getZ(), iBlockData);
-
-						entityFallingBlock.getClass().getField("ticksLived").set(entityFallingBlock, (int) 1);
-						entityFallingBlock.getClass().getSuperclass().getMethod("setCustomName", String.class)
-								.invoke(entityFallingBlock, user.getUUID().toString());
-						entityFallingBlock.getClass().getSuperclass().getMethod("setCustomNameVisible", boolean.class)
-								.invoke(entityFallingBlock, false);
-
-						entityFallingBlock.getClass().getMethod("a", boolean.class).invoke(entityFallingBlock, true);
-						entityFallingBlock.getClass().getField("dropItem").set(entityFallingBlock, false);
-
-						world.getClass().getMethod("addEntity", Utils.getNMSClass("Entity"), SpawnReason.class)
-								.invoke(world, entityFallingBlock, SpawnReason.CUSTOM);
-
-						if (number % 2 == 0) {
-							entityFallingBlock.getClass().getSuperclass().getField("motX").set(entityFallingBlock,
-									(1 - (Math.random() * 2)) / 10.0);
-							entityFallingBlock.getClass().getSuperclass().getField("motY").set(entityFallingBlock, 0);
-							entityFallingBlock.getClass().getSuperclass().getField("motZ").set(entityFallingBlock,
-									(1 - (Math.random() * 2)) / 10.0);
-							entityFallingBlock.getClass().getSuperclass().getField("velocityChanged")
-									.set(entityFallingBlock, true);
+						// Use modern Bukkit API to spawn a falling block
+						org.bukkit.Material material = itemStack.getMaterial();
+						org.bukkit.block.data.BlockData blockData = Bukkit.createBlockData(material);
+						FallingBlock fallingBlock = player.getWorld().spawnFallingBlock(l, blockData);
+						
+						// Set falling block properties
+						fallingBlock.setDropItem(false);
+						fallingBlock.setCustomName(user.getUUID().toString());
+						fallingBlock.setCustomNameVisible(false);
+						
+						// Reduce velocity to keep blocks within arena - very slight random drift only
+						if (number % 5 == 0) {
+							org.bukkit.util.Vector velocity = new org.bukkit.util.Vector(
+								(Math.random() - 0.5) / 20.0,  // Much smaller offset
+								0,
+								(Math.random() - 0.5) / 20.0   // Much smaller offset
+							);
+							fallingBlock.setVelocity(velocity);
 						}
 
 					} catch (Exception e) {

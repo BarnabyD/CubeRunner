@@ -1,6 +1,7 @@
 package me.poutineqc.cuberunner.utils;
 
 import org.bukkit.Material;
+import org.bukkit.Bukkit;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 
@@ -9,8 +10,7 @@ public class ItemHeadManager extends ItemStackManager {
 	private String playerName;
 
 	public ItemHeadManager(String playerName) {
-		super(Material.SKULL_ITEM);
-		this.durability = 3;
+		super(Material.PLAYER_HEAD);
 		this.playerName = playerName;
 	}
 
@@ -18,22 +18,21 @@ public class ItemHeadManager extends ItemStackManager {
 		super(itemStack);
 
 		SkullMeta meta = (SkullMeta) itemStack.getItemMeta();
-		this.playerName = meta.hasOwner() ? meta.getOwner() : null;
+		this.playerName = meta != null && meta.getOwningPlayer() != null ? meta.getOwningPlayer().getName() : null;
 	}
 
 	public ItemHeadManager() {
-		super(Material.SKULL_ITEM);
-		this.durability = 3;
+		super(Material.PLAYER_HEAD);
 	}
 
 	@Override
 	public ItemStack getItem() {
 		ItemStack itemStack = super.getItem();
 		SkullMeta meta = (SkullMeta) itemStack.getItemMeta();
-		if (playerName != null)
-			meta.setOwner(playerName);
-
-		itemStack.setItemMeta(meta);
+		if (playerName != null && meta != null) {
+			meta.setOwningPlayer(Bukkit.getOfflinePlayer(playerName));
+			itemStack.setItemMeta(meta);
+		}
 		return itemStack;
 	}
 
@@ -42,14 +41,11 @@ public class ItemHeadManager extends ItemStackManager {
 		if (!super.isSame(itemStack))
 			return false;
 
-		if (durability != 3)
-			return true;
-
 		SkullMeta meta = (SkullMeta) itemStack.getItemMeta();
-		if (meta.hasOwner()) {
+		if (meta != null && meta.hasOwner()) {
 			if (playerName == null)
 				return false;
-			else if (!meta.getOwner().equalsIgnoreCase(playerName))
+			else if (meta.getOwningPlayer() != null && !meta.getOwningPlayer().getName().equalsIgnoreCase(playerName))
 				return false;
 		} else if (playerName != null)
 			return false;

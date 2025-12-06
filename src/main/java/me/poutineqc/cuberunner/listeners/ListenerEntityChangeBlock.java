@@ -13,7 +13,9 @@ public class ListenerEntityChangeBlock implements Listener {
 	public void onEntityChangeBlock(EntityChangeBlockEvent event) {
 		if ((event.getEntity() instanceof FallingBlock)) {
 			FallingBlock fallingBlock = (FallingBlock) event.getEntity();
-			if ((fallingBlock.getMaterial() == Material.WOOL) && (event.getBlock().getType() == Material.AIR)) {
+			// Check if block is a wool variant (modern materials use individual color constants)
+			String materialName = fallingBlock.getMaterial().toString();
+			if (materialName.endsWith("_WOOL") && (event.getBlock().getType() == Material.AIR)) {
 				if (fallingBlock.getCustomName()
 						.matches("[a-f0-9]{8}-[a-f0-9]{4}-4[0-9]{3}-[89ab][a-f0-9]{3}-[0-9a-f]{12}"))
 					event.setCancelled(false);

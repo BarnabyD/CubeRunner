@@ -346,20 +346,22 @@ public enum CRCommand {
 	},
 	SETZONE("setzone", Messages.COMMAND_SETZONE, "cuberunner.admin.edit.zone", "/%command% setzone <arenaName>",
 			CRCommandType.ARENA) {
-		@Override
-		public void execute(CubeRunner plugin, Player player, String[] args, Object... extra) {
-			Language local = CubeRunner.get().getLang(player);
+	@Override
+	public void execute(CubeRunner plugin, Player player, String[] args, Object... extra) {
+		Language local = CubeRunner.get().getLang(player);
 
-			Arena arena = args.length > 1 ? Arena.getArena(args[1]) : null;
-			if (arena == null) {
-				local.sendMsg(player, local.get(Messages.ERROR_MISSING_ARENA));
-				return;
-			}
-
-			arena.setArena(player);
+		Arena arena = args.length > 1 ? Arena.getArena(args[1]) : null;
+		if (arena == null) {
+			local.sendMsg(player, local.get(Messages.ERROR_MISSING_ARENA));
+			return;
 		}
 
-		@Override
+		try {
+			arena.setArena(player);
+		} catch (com.sk89q.worldedit.IncompleteRegionException e) {
+			local.sendMsg(player, ChatColor.RED + "Error: " + e.getMessage());
+		}
+	}		@Override
 		public void complete(List<String> tabCompletion, String[] args) {
 			if (args.length == 2)
 				for (Arena arena : Arena.getArenas())

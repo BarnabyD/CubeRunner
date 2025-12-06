@@ -6,7 +6,6 @@ import java.util.logging.Logger;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -43,13 +42,9 @@ public class CubeRunner extends JavaPlugin {
 	private AchievementManager achievementManager;
 
 	private Economy economy;
-	public static String NMS_VERSION;
-	public static boolean aboveOneNine;
 
 	public void onEnable() {
 		plugin = this;
-		NMS_VERSION = getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3];
-		aboveOneNine = NMS_VERSION.startsWith("v1_9") || NMS_VERSION.startsWith("v1_1") || NMS_VERSION.startsWith("v2");
 
 		config = new Configuration(this);
 		if (config.lookForUpdates) {
@@ -90,11 +85,10 @@ public class CubeRunner extends JavaPlugin {
 			}
 		}, 0);
 
-		getLogger().info(getDescription().getName() + " has been enabled (v" + getDescription().getVersion() + ")");
+		getLogger().info(getName() + " has been enabled (v" + getPluginMeta().getVersion() + ")");
 	}
 
 	public void onDisable() {
-		PluginDescriptionFile pdfFile = getDescription();
 		Logger logger = getLogger();
 
 		if (config.lookForUpdates)
@@ -105,11 +99,12 @@ public class CubeRunner extends JavaPlugin {
 		else
 			arenaData.loadArenaData();
 
-		logger.info(pdfFile.getName() + " has been diabled");
+		logger.info(getName() + " has been disabled");
 	}
 
 	public void reload() {
-		updater.stop();
+		if (updater != null)
+			updater.stop();
 		Language.clear();
 
 		config.loadConfiguration(this);
@@ -194,9 +189,7 @@ public class CubeRunner extends JavaPlugin {
 		pm.registerEvents(new ListenerSignBreak(), this);
 		pm.registerEvents(new ListenerInventoryClick(), this);
 		pm.registerEvents(new ListenerEntityChangeBlock(), this);
-
-		if (aboveOneNine)
-			pm.registerEvents(new ListenerEntityGlide(), this);
+		pm.registerEvents(new ListenerEntityGlide(), this);
 	}
 
 	public Configuration getConfiguration() {

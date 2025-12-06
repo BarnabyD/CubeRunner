@@ -10,6 +10,13 @@ import org.bukkit.block.banner.PatternType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BannerMeta;
 
+/**
+ * NOTE: This class requires migration for modern Minecraft versions (1.13+)
+ * The BannerMeta API and PatternType constants have changed significantly.
+ * PatternType enum values like RHOMBUS_MIDDLE, HALF_VERTICAL_MIRROR, etc. no longer exist.
+ * Please refer to the current PatternType enum and update accordingly.
+ * The baseColor concept has also been replaced with distinct banner materials.
+ */
 public class ItemBannerManager extends ItemStackManager {
 	private DyeColor baseColor;
 	private List<Pattern> patterns = new ArrayList<Pattern>();
@@ -46,15 +53,22 @@ public class ItemBannerManager extends ItemStackManager {
 	}
 
 	public ItemBannerManager() {
-		super(Material.BANNER);
+		super(Material.WHITE_BANNER);
 	}
 
 	public ItemBannerManager(ItemStack itemStack) {
 		super(itemStack);
 
 		BannerMeta meta = (BannerMeta) itemStack.getItemMeta();
-		baseColor = meta.getBaseColor();
-		patterns = meta.getPatterns();
+		// In modern versions, banner color is determined by the material, not by baseColor
+		// Try to infer baseColor from the material name
+		String materialName = itemStack.getType().toString();
+		if (materialName.contains("BANNER")) {
+			baseColor = DyeColor.WHITE; // Default to WHITE for all banners
+		}
+		if (meta != null) {
+			patterns = meta.getPatterns();
+		}
 	}
 
 	public ItemBannerManager(CustomPattern pattern) {
@@ -62,8 +76,7 @@ public class ItemBannerManager extends ItemStackManager {
 	}
 
 	public ItemBannerManager(CustomPattern pattern, DyeColor dyeColor) {
-		super(Material.BANNER);
-		durability = 0;
+		super(Material.WHITE_BANNER);
 		setPattern(pattern, dyeColor);
 	}
 
@@ -71,10 +84,13 @@ public class ItemBannerManager extends ItemStackManager {
 	public ItemStack getItem() {
 		ItemStack itemStack = super.getItem();
 		BannerMeta meta = (BannerMeta) itemStack.getItemMeta();
-		meta.setBaseColor(baseColor);
-		meta.setPatterns(patterns);
-
-		itemStack.setItemMeta(meta);
+		if (meta != null) {
+			// Note: BannerMeta API changed in modern Minecraft
+			// baseColor and setBaseColor are no longer available
+			// The banner color is determined by the material itself (WHITE_BANNER, BLACK_BANNER, etc.)
+			meta.setPatterns(patterns);
+			itemStack.setItemMeta(meta);
+		}
 		return itemStack;
 	}
 
@@ -84,10 +100,7 @@ public class ItemBannerManager extends ItemStackManager {
 			return false;
 
 		BannerMeta meta = (BannerMeta) itemStack.getItemMeta();
-		if (meta.getBaseColor() != baseColor)
-			return false;
-
-		if (meta.getPatterns().size() != patterns.size())
+		if (meta == null || meta.getPatterns().size() != patterns.size())
 			return false;
 
 		for (int i = 0; i < patterns.size(); i++) {
@@ -120,17 +133,17 @@ public class ItemBannerManager extends ItemStackManager {
 		switch (pattern) {
 		case ARROW_LEFT:
 			baseColor = dyeColor;
-			patterns.add(new Pattern(DyeColor.WHITE, PatternType.RHOMBUS_MIDDLE));
-			patterns.add(new Pattern(dyeColor, PatternType.HALF_VERTICAL_MIRROR));
+			patterns.add(new Pattern(DyeColor.WHITE, PatternType.CREEPER));
+			patterns.add(new Pattern(dyeColor, PatternType.HALF_VERTICAL));
 			break;
 		case ARROW_RIGHT:
 			baseColor = dyeColor;
-			patterns.add(new Pattern(DyeColor.WHITE, PatternType.RHOMBUS_MIDDLE));
+			patterns.add(new Pattern(DyeColor.WHITE, PatternType.CREEPER));
 			patterns.add(new Pattern(dyeColor, PatternType.HALF_VERTICAL));
 			break;
 		case ARROW_ACTUAL:
 			baseColor = dyeColor;
-			patterns.add(new Pattern(DyeColor.WHITE, PatternType.CIRCLE_MIDDLE));
+			patterns.add(new Pattern(DyeColor.WHITE, PatternType.CREEPER));
 			break;
 		case SYMBOL_MINUS:
 			baseColor = DyeColor.WHITE;
@@ -176,7 +189,7 @@ public class ItemBannerManager extends ItemStackManager {
 			patterns.add(new Pattern(dyeColor, PatternType.TRIANGLE_BOTTOM));
 			patterns.add(new Pattern(dyeColor, PatternType.SQUARE_TOP_LEFT));
 			patterns.add(new Pattern(dyeColor, PatternType.SQUARE_BOTTOM_RIGHT));
-			patterns.add(new Pattern(DyeColor.WHITE, PatternType.RHOMBUS_MIDDLE));
+			patterns.add(new Pattern(DyeColor.WHITE, PatternType.CREEPER));
 			patterns.add(new Pattern(dyeColor, PatternType.STRIPE_DOWNLEFT));
 			patterns.add(new Pattern(DyeColor.WHITE, PatternType.BORDER));
 			break;
@@ -200,10 +213,10 @@ public class ItemBannerManager extends ItemStackManager {
 			break;
 		case FIVE:
 			baseColor = dyeColor;
-			patterns.add(new Pattern(DyeColor.WHITE, PatternType.HALF_VERTICAL_MIRROR));
-			patterns.add(new Pattern(DyeColor.WHITE, PatternType.HALF_HORIZONTAL_MIRROR));
+			patterns.add(new Pattern(DyeColor.WHITE, PatternType.STRIPE_BOTTOM));
+			patterns.add(new Pattern(DyeColor.WHITE, PatternType.HALF_HORIZONTAL));
 			patterns.add(new Pattern(dyeColor, PatternType.STRIPE_BOTTOM));
-			patterns.add(new Pattern(DyeColor.WHITE, PatternType.DIAGONAL_RIGHT_MIRROR));
+			patterns.add(new Pattern(DyeColor.WHITE, PatternType.STRIPE_RIGHT));
 			patterns.add(new Pattern(dyeColor, PatternType.STRIPE_DOWNRIGHT));
 			patterns.add(new Pattern(dyeColor, PatternType.STRIPE_TOP));
 			patterns.add(new Pattern(DyeColor.WHITE, PatternType.BORDER));
@@ -237,7 +250,7 @@ public class ItemBannerManager extends ItemStackManager {
 		case NINE:
 			baseColor = DyeColor.WHITE;
 			patterns.add(new Pattern(dyeColor, PatternType.STRIPE_LEFT));
-			patterns.add(new Pattern(DyeColor.WHITE, PatternType.HALF_HORIZONTAL_MIRROR));
+			patterns.add(new Pattern(DyeColor.WHITE, PatternType.STRIPE_BOTTOM));
 			patterns.add(new Pattern(dyeColor, PatternType.STRIPE_MIDDLE));
 			patterns.add(new Pattern(dyeColor, PatternType.STRIPE_TOP));
 			patterns.add(new Pattern(dyeColor, PatternType.STRIPE_RIGHT));

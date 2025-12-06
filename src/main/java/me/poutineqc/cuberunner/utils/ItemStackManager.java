@@ -16,7 +16,6 @@ public class ItemStackManager {
 
 	protected Material material;
 	protected int amount = 1;
-	protected short durability = 0;
 
 	protected String name;
 	protected List<String> lore = new ArrayList<String>();
@@ -29,24 +28,31 @@ public class ItemStackManager {
 	public ItemStackManager(ItemStack itemStack) {
 		this.material = itemStack.getType();
 		this.amount = itemStack.getAmount();
-		this.durability = itemStack.getDurability();
 
 		ItemMeta meta = itemStack.getItemMeta();
-		this.name = meta.hasDisplayName() ? meta.getDisplayName() : null;
-		this.enchantments = meta.hasEnchants() ? meta.getEnchants() : new HashMap<Enchantment, Integer>();
-		this.lore = meta.hasLore() ? meta.getLore() : null;
+		if (meta != null) {
+			this.name = meta.hasDisplayName() ? meta.getDisplayName() : null;
+			this.enchantments = meta.hasEnchants() ? meta.getEnchants() : new HashMap<Enchantment, Integer>();
+			this.lore = meta.hasLore() ? meta.getLore() : null;
+		}
 	}
 
 	public ItemStack getItem() {
-		ItemStack itemStack = new ItemStack(material, amount, durability);
+		ItemStack itemStack = new ItemStack(material, amount);
 
 		ItemMeta meta = itemStack.getItemMeta();
-		meta.setDisplayName(name);
-		meta.setLore(lore);
-		for (Entry<Enchantment, Integer> enchantment : enchantments.entrySet())
-			meta.addEnchant(enchantment.getKey(), enchantment.getValue(), true);
+		if (meta != null) {
+			if (name != null) {
+				meta.setDisplayName(name);
+			}
+			if (lore != null && !lore.isEmpty()) {
+				meta.setLore(lore);
+			}
+			for (Entry<Enchantment, Integer> enchantment : enchantments.entrySet())
+				meta.addEnchant(enchantment.getKey(), enchantment.getValue(), true);
 
-		itemStack.setItemMeta(meta);
+			itemStack.setItemMeta(meta);
+		}
 		return itemStack;
 	}
 
@@ -54,31 +60,28 @@ public class ItemStackManager {
 		if (material != itemStack.getType())
 			return false;
 
-		if (durability != itemStack.getDurability())
-			return false;
+		ItemMeta meta = itemStack.getItemMeta();
+		if (meta == null)
+			return name == null && enchantments.isEmpty();
 
-		if (itemStack.getItemMeta().hasDisplayName()) {
+		if (meta.hasDisplayName()) {
 			if (name == null)
 				return false;
 			
-			if (!Utils.isEqualOnColorStrip(itemStack.getItemMeta().getDisplayName(), name))
+			if (!Utils.isEqualOnColorStrip(meta.getDisplayName(), name))
 				return false;
 			
 		} else if (name != null)
 			return false;
 
-		if (itemStack.getItemMeta().hasEnchants()) {
-			for (Entry<Enchantment, Integer> enchantment : itemStack.getItemMeta().getEnchants().entrySet())
+		if (meta.hasEnchants()) {
+			for (Entry<Enchantment, Integer> enchantment : meta.getEnchants().entrySet())
 				if (!hasEnchantement(enchantment.getKey(), enchantment.getValue()))
 					return false;
 		} else if (enchantments.size() > 0)
 			return false;
 
 		return true;
-	}
-
-	public void setData(short durability) {
-		this.durability = durability;
 	}
 
 	public void setDisplayName(String displayName) {
@@ -115,10 +118,6 @@ public class ItemStackManager {
 
 	public Material getMaterial() {
 		return material;
-	}
-
-	public short getDurability() {
-		return durability;
 	}
 
 	public boolean hasEnchantement(Enchantment enchantement) {

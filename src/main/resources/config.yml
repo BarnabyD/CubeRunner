@@ -111,4 +111,4 @@ commands:
 # +------------------------------------------------------+ #
 ############################################################
 
-checkForUpdates: true
+checkForUpdates: false # Note: This will search against the SpigotMC version only, not the BarnabyD fork

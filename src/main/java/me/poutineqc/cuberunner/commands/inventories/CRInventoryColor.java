@@ -50,8 +50,7 @@ public class CRInventoryColor extends CRInventory {
 		 * Glass Spacer
 		 ***************************************************/
 
-		icon = new InventoryItem(new ItemStackManager(Material.STAINED_GLASS_PANE));
-		icon.getItem().setData((short) 10);
+		icon = new InventoryItem(new ItemStackManager(Material.CYAN_STAINED_GLASS_PANE));
 		icon.getItem().setDisplayName(ChatColor.RED + "");
 
 		for (int i = 0; i < inventory.getSize(); i++)
@@ -93,7 +92,11 @@ public class CRInventoryColor extends CRInventory {
 
 	@Override
 	public void update(ItemStack itemStack, InventoryAction action) {
-		if (itemStack.getType() != Material.STAINED_CLAY && itemStack.getType() != Material.WOOL)
+		String typeName = itemStack.getType().toString();
+		boolean isWool = typeName.endsWith("_WOOL");
+		boolean isTerracotta = itemStack.getType() == Material.TERRACOTTA;
+		
+		if (!isWool && !isTerracotta)
 			return;
 		
 		if (arena.getGameState() == GameState.ACTIVE || arena.getGameState() == GameState.ENDING) {
@@ -103,16 +106,27 @@ public class CRInventoryColor extends CRInventory {
 			return;
 		}
 		
-		int valueOfItem = itemStack.getDurability();
-		if (itemStack.getType() == Material.STAINED_CLAY)
-			valueOfItem += 16;
+		// Determine the color index (0-15 for wool, 16-31 for terracotta)
+		int colorIndex = 0;
+		String[] woolColors = {"WHITE", "ORANGE", "MAGENTA", "LIGHT_BLUE", "YELLOW", "LIME", "PINK", "GRAY",
+				"LIGHT_GRAY", "CYAN", "PURPLE", "BLUE", "BROWN", "GREEN", "RED", "BLACK"};
+		
+		for (int i = 0; i < woolColors.length; i++) {
+			if (typeName.contains(woolColors[i])) {
+				colorIndex = i;
+				break;
+			}
+		}
+		
+		if (isTerracotta)
+			colorIndex += 16;
 
 		if (itemStack.getItemMeta().hasEnchants()) {
 			arena.getColorManager()
-					.setColorIndice(arena.getColorManager().getColorIndice() - (int) Math.pow(2, valueOfItem));
+					.setColorIndice(arena.getColorManager().getColorIndice() - (int) Math.pow(2, colorIndex));
 		} else {
 			arena.getColorManager()
-					.setColorIndice(arena.getColorManager().getColorIndice() + (int) Math.pow(2, valueOfItem));
+					.setColorIndice(arena.getColorManager().getColorIndice() + (int) Math.pow(2, colorIndex));
 		}
 
 		arena.resetArena(itemStack);

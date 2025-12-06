@@ -41,6 +41,20 @@ public class ColorManager {
 		}
 	}
 
+	private static final Material[] WOOL_COLORS = {
+		Material.WHITE_WOOL, Material.ORANGE_WOOL, Material.MAGENTA_WOOL, Material.LIGHT_BLUE_WOOL,
+		Material.YELLOW_WOOL, Material.LIME_WOOL, Material.PINK_WOOL, Material.GRAY_WOOL,
+		Material.LIGHT_GRAY_WOOL, Material.CYAN_WOOL, Material.PURPLE_WOOL, Material.BLUE_WOOL,
+		Material.BROWN_WOOL, Material.GREEN_WOOL, Material.RED_WOOL, Material.BLACK_WOOL
+	};
+
+	private static final Material[] TERRACOTTA_COLORS = {
+		Material.WHITE_TERRACOTTA, Material.ORANGE_TERRACOTTA, Material.MAGENTA_TERRACOTTA, Material.LIGHT_BLUE_TERRACOTTA,
+		Material.YELLOW_TERRACOTTA, Material.LIME_TERRACOTTA, Material.PINK_TERRACOTTA, Material.GRAY_TERRACOTTA,
+		Material.LIGHT_GRAY_TERRACOTTA, Material.CYAN_TERRACOTTA, Material.PURPLE_TERRACOTTA, Material.BLUE_TERRACOTTA,
+		Material.BROWN_TERRACOTTA, Material.GREEN_TERRACOTTA, Material.RED_TERRACOTTA, Material.BLACK_TERRACOTTA
+	};
+
 	public void updateLists() {
 		allBlocks = new ArrayList<ItemStackManager>();
 		onlyChoosenBlocks = new ArrayList<ItemStackManager>();
@@ -48,16 +62,17 @@ public class ColorManager {
 
 		for (int i = 31; i >= 0; i--) {
 			ItemStackManager icon;
-			if (i >= 16)
-				icon = new ItemStackManager(Material.STAINED_CLAY);
-			else
-				icon = new ItemStackManager(Material.WOOL);
-
-			icon.setData((short) (i % 16));
+			if (i >= 16) {
+				// Use terracotta colors for upper 16 colors
+				icon = new ItemStackManager(TERRACOTTA_COLORS[i % 16]);
+			} else {
+				// Use wool colors for lower 16 colors
+				icon = new ItemStackManager(WOOL_COLORS[i % 16]);
+			}
 
 			int value = (int) Math.pow(2, i);
 			if (value <= tempColorIndice) {
-				icon.addEnchantement(Enchantment.DURABILITY, 1);
+				icon.addEnchantement(Enchantment.UNBREAKING, 1);
 				tempColorIndice -= value;
 				onlyChoosenBlocks.add(0, icon);
 			}
